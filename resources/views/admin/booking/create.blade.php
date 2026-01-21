@@ -1,0 +1,119 @@
+<x-app-layout>
+    <x-slot name="header">
+        <div
+            class="flex justify-between items-center max-w-7xl mx-auto sm:px-6 lg:px-8 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-xl px-4 py-4">
+            <h2 class="font-semibold text-2xl text-gray-900 dark:text-gray-100 leading-tight mx-auto">
+                Add New Booking
+            </h2>
+        </div>
+    </x-slot>
+
+    <div class="max-w-4xl mx-auto py-12 px-6">
+        {{-- Success & Error Messages --}}
+        @if (session('success'))
+            <x-notification type="success" :message="session('success')" />
+        @endif
+
+        @if (session('error'))
+            <x-notification type="error" :message="session('error')" />
+        @endif
+
+        @if ($errors->any())
+            @foreach ($errors->all() as $error)
+                <x-notification type="error" :message="$error" />
+            @endforeach
+        @endif
+
+        {{-- Booking Form Card --}}
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-100 dark:border-gray-700 p-8">
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6">
+                Booking Information
+            </h3>
+
+            <form action="{{ route('admin.booking.store') }}" method="POST" class="space-y-6">
+                @csrf
+
+                <input type="hidden" name="user_id" value="{{ Auth::user()->id }}">
+                <!-- Booking Type -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Booking Type
+                    </label>
+                    <input type="text" name="type" value="{{ old('type') }}"
+                        class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 
+                               bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100
+                               focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 
+                               focus:outline-none transition-all duration-300"
+                        placeholder="e.g., Restaurant, Hotel, Event">
+                </div>
+
+                <!-- Date & Time -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Booking Date
+                        </label>
+                        <input type="date" name="booking_date" value="{{ old('booking_date') }}"
+                            class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 
+                                   bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100
+                                   focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 
+                                   focus:outline-none transition-all duration-300">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Booking Time
+                        </label>
+                        <input type="time" name="booking_time" value="{{ old('booking_time') }}"
+                            class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 
+                                   bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100
+                                   focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 
+                                   focus:outline-none transition-all duration-300">
+                    </div>
+                </div>
+
+                <!-- People Count -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        People Count
+                    </label>
+                    <input type="number" name="people_count" min="1" value="{{ old('people_count') }}"
+                        class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 
+                               bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100
+                               focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 
+                               focus:outline-none transition-all duration-300"
+                        placeholder="Number of people">
+                </div>
+
+                <!-- Note -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Note (Optional)
+                    </label>
+                    <textarea name="note" rows="4"
+                        class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 
+                               bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100
+                               focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 
+                               focus:outline-none transition-all duration-300"
+                        placeholder="Special requests or comments...">{{ old('note') }}</textarea>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex justify-end space-x-4 pt-6">
+                    <a href="{{ route('admin.booking.index') }}"
+                        class="px-5 py-2 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-300 
+                              hover:text-gray-900 dark:hover:text-white transition duration-300">
+                        Cancel
+                    </a>
+                    <button type="submit"  x-data="loadingButton" @click="handleClick" data-loading
+                        class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-gray-900 to-gray-800 
+                                   dark:from-gray-100 dark:to-gray-300 
+                                   text-white dark:text-gray-900 font-semibold text-sm 
+                                   shadow-md hover:shadow-lg hover:scale-[1.02] 
+                                   transition-all duration-300 ease-in-out">
+                        Save Booking
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</x-app-layout>
