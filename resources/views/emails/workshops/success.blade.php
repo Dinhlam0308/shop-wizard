@@ -1,29 +1,30 @@
 <x-mail::message>
-# 🎉 Đăng Ký Workshop Thành Công!
+# 🎉 Workshop Registration Received
 
-Xin chào **{{ $registration->name }}**,  
-Cảm ơn bạn đã đăng ký tham gia **{{ $registration->workshop->title }}**.
+Hi **{{ $registration->name }}**,  
+Thank you for registering for **{{ $registration->workshop->title }}**.  
+Your registration has been successfully submitted and is now **pending confirmation**.
 
 ---
 
-### 🗓 Thông Tin Workshop
-- **Ngày:** {{ \Carbon\Carbon::parse($registration->workshop->date)->format('d/m/Y') }}
-- **Thời gian:** {{ $registration->workshop->time ?? 'Sẽ được thông báo sau' }}
-- **Địa điểm:** {{ $registration->workshop->location ?? 'Sẽ được thông báo sau' }}
+### 🗓 Workshop Details
+- **Date:** {{ \Carbon\Carbon::parse($registration->workshop->date)->format('d/m/Y') }}
+- **Time:** {{ $registration->workshop->time ?? 'To be updated' }}
+- **Location:** {{ $registration->workshop->location ?? 'To be updated' }}
 
 @if($registration->note)
-> **Ghi chú của bạn:** {{ $registration->note }}
+> **Your Note:** {{ $registration->note }}
 @endif
 
 ---
 
-<x-mail::button :url="url('/')">
-Truy Cập Website Always Café
+<x-mail::button :url="url('/workshops/' . $registration->workshop_id)">
+View Workshop Information
 </x-mail::button>
 
-Chúng tôi sẽ liên hệ lại với bạn khi việc đăng ký được xác nhận.  
-Cảm ơn bạn và hẹn gặp lại tại **Always Café**! ☕✨
+We’ll contact you as soon as your registration is confirmed.  
+Thanks again — and we look forward to seeing you at **Always Café** ☕✨
 
-Trân trọng,  
-**Đội Ngũ Workshop Always Café**
+Best regards,  
+— **Always Café Workshop Team**
 </x-mail::message>

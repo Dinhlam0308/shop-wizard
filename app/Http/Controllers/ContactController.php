@@ -50,11 +50,14 @@ class ContactController extends Controller
                 'name' => 'required|string|max:255',
                 'email' => 'required|email|max:255',
                 'message' => 'required|string',
+                'phone' => 'nullable|string|max:20',
             ]);
             $validated = $validator->validate();
 
             Contact::create($validated);
-            \Mail::to($validated['email'])->send(new \App\Mail\ContactFormSubmitted($validated));
+            dispatch(function () use ($validated) {
+                \Mail::to($validated['email'])->cc(config('mail.from.address'))->send(new \App\Mail\ContactFormSubmitted($validated));
+            })->afterResponse();
 
             return redirect()->back()->with('success', 'Your message has been sent successfully.');
         } catch (\Exception $e) {
@@ -94,6 +97,7 @@ class ContactController extends Controller
                 'name' => 'required|string|max:255',
                 'email' => 'required|email|max:255',
                 'message' => 'required|string',
+                'phone' => 'nullable|string|max:20',
             ]);
             $validated = $validator->validate();
 

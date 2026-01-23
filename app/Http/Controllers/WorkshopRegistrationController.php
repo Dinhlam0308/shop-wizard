@@ -16,7 +16,7 @@ class WorkshopRegistrationController extends Controller
     public function index()
     {
         try {
-            $workshopRegistrations = DB::table('workshop_registrations')->paginate(10);
+            $workshopRegistrations = DB::table('workshop_registrations')->orderByDesc('created_at')->paginate(10);
             return view("user.workshop_registrations.index", compact("workshopRegistrations"));
         } catch (\Exception $e) {
             return redirect()->back()
@@ -48,10 +48,14 @@ class WorkshopRegistrationController extends Controller
         }
     }
 
-    public function create()
+    public function create(string $id)
     {
         try {
-            return view("user.workshop_registrations.create");
+            $match = \App\Models\Workshop::findOrFail($id);
+            if (!$match) {
+                return redirect()->back()->withErrors(['error' => 'Workshop not found.']);
+            }
+            return view("user.workshop_registrations.create", compact('match'));
         } catch (\Exception $e) {
             return redirect()->back()
                 ->withErrors(['error' => 'Failed to load create workshop registration form: ' . $e->getMessage()]);
@@ -66,7 +70,7 @@ class WorkshopRegistrationController extends Controller
                 'workshop_id' => 'required|exists:workshops,id',
                 'name' => 'required|string|max:255',
                 'email' => 'required|email|max:255',
-                'phone' => 'nullable|string|max:20',
+                'phone' => 'required|string|max:20',
                 'note' => 'nullable|string',
             ]);
             $validated = $validator->validate();
@@ -78,12 +82,15 @@ class WorkshopRegistrationController extends Controller
                     }
                 })->first();
             if ($existingRegistration) {
+                DB::rollBack();
                 return redirect()->back()
-                    ->withErrors(['error' => 'You have already registered for this workshop with the same email or phone number.']);
+                    ->withErrors(['error' => 'You have already registered for this workshop with the same email or phone number.'])->withInput();
             }
             $registration = \App\Models\WorkshopRegistration::create($validated);
-            Mail::to($registration->email)->send(new WorkshopRegistrationSuccess($registration));
             DB::commit();
+            dispatch(function () use ($registration) {
+                Mail::to($registration->email)->cc(config('mail.from.address'))->send(new WorkshopRegistrationSuccess($registration));
+            })->afterResponse();
             return redirect()->back()->with('success', 'Workshop registration created successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -133,14 +140,16 @@ class WorkshopRegistrationController extends Controller
             ]);
             $validated = $validator->validate();
             $registration->update($validated);
-            if ($validated['status'] === 'confirmed') {
-                Mail::to($registration->email)->send(new WorkshopConfirmedMail($registration));
-            }
-
-            if ($validated['status'] === 'cancelled') {
-                Mail::to($registration->email)->send(new WorkshopCancelledMail($registration));
-            }
             DB::commit();
+            dispatch(function () use ($validated, $registration) {
+                if ($validated['status'] === 'confirmed') {
+                    Mail::to($registration->email)->send(new WorkshopConfirmedMail($registration));
+                }
+
+                if ($validated['status'] === 'cancelled') {
+                    Mail::to($registration->email)->send(new WorkshopCancelledMail($registration));
+                }
+            })->afterResponse();
             return redirect()->route('admin.workshop_registrations.index')->with('success', 'Workshop registration updated successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -149,5 +158,21 @@ class WorkshopRegistrationController extends Controller
         }
     }
 
-    public function destroy(string $id) {}
+    public function destroy(string $id)
+    {
+        try {
+            DB::beginTransaction();
+            $registration = \App\Models\WorkshopRegistration::findOrFail($id);
+            if (!$registration) {
+                return redirect()->route('admin.workshop_registrations.index')->withErrors(['error' => 'Workshop registration not found.']);
+            }
+            $registration->delete();
+            DB::commit();
+            return redirect()->route('admin.workshop_registrations.index')->with('success', 'Workshop registration deleted successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->withErrors(['error' => 'Failed to delete workshop registration: ' . $e->getMessage()]);
+        }
+    }
 }

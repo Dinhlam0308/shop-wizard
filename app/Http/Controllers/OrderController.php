@@ -173,7 +173,7 @@ class OrderController extends Controller
             }
 
             $user = \App\Models\User::findOrFail($validated_order['user_id']);
-            \Mail::to($user->email)->cc(config('mail.from.address'))->send(new \App\Mail\OrderCreated($validated_order, ['items' => $itemsForMail]));
+
 
             $cart = \App\Models\Cart::where('user_id', $validated_order['user_id'])->first();
             if ($cart) {
@@ -181,6 +181,9 @@ class OrderController extends Controller
             }
 
             DB::commit();
+            dispatch(function () use ($user, $order, $itemsForMail) {
+                \Mail::to($user->email)->cc(config('mail.from.address'))->send(new \App\Mail\OrderCreated($order, ['items' => $itemsForMail]));
+            })->afterResponse();
             return redirect()->back()->with('success', 'Order created successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -254,12 +257,14 @@ class OrderController extends Controller
 
             $order->update(['status' => $newStatus]);
 
-            // gửi mail chỉ khi chuyển sang completed
-            if ($oldStatus !== 'completed' && $newStatus === 'completed') {
-                \Mail::to($order->user->email)->send(new \App\Mail\OrderCompleted($order));
-            }
-
             DB::commit();
+
+            // gửi mail chỉ khi chuyển sang completed
+            dispatch(function () use ($order, $oldStatus, $newStatus) {
+                if ($oldStatus !== 'completed' && $newStatus === 'completed') {
+                    \Mail::to($order->user->email)->send(new \App\Mail\OrderCompleted($order));
+                }
+            })->afterResponse();
 
             return redirect()->route('admin.order.index')->with('success', 'Order updated successfully.');
         } catch (\Exception $e) {

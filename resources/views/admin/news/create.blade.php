@@ -87,6 +87,10 @@
 
                     {{-- Mini toolbar --}}
                     <div class="flex flex-wrap items-center gap-2">
+                        <button type="button" @click="insertImageCaptionMarker()"
+                            class="px-2 py-1 rounded-lg text-xs bg-gray-100 dark:bg-gray-700">
+                            Image &Caption
+                        </button>
                         <button type="button" @click="wrap('**','**')"
                             class="px-2 py-1 rounded-lg text-xs bg-gray-100 dark:bg-gray-700">Bold</button>
                         <button type="button" @click="wrap('*','*')"
@@ -141,66 +145,157 @@ Write **bold**, *italic*…
                     </div>
                 </div>
 
-                {{-- Featured Image (Logic chuẩn + UI đẹp) --}}
-                <div x-data="productMainImageUpload({ maxMB: 5 })">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                        Featured Image <span class="text-red-500">*</span>
-                    </label>
+                <!-- Image Upload Section -->
+                <div class="space-y-8">
+                    {{-- Featured Image (News) --}}
+                    <div x-data="productMainImageUpload({ maxMB: 5 })">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                            Featured Image <span class="text-red-500">*</span>
+                        </label>
 
-                    {{-- error --}}
-                    <template x-if="error">
-                        <p class="text-sm text-red-600 mb-3" x-text="error"></p>
-                    </template>
-
-                    <div @drop.prevent="onDrop($event)" @dragover.prevent="isDragging = true"
-                        @dragleave.prevent="isDragging = false" @click="$refs.mainInput.click()"
-                        :class="isDragging ? 'border-blue-400 bg-blue-50' : 'border-gray-300'"
-                        class="relative border-2 border-dashed rounded-2xl p-8
-               bg-gray-50 dark:bg-gray-700 cursor-pointer
-               transition-all duration-200 hover:border-blue-400
-               hover:bg-blue-50 dark:hover:bg-gray-600 group">
-                        <input type="file" name="image" x-ref="mainInput" accept="image/*" class="hidden"
-                            @change="onChange($event)" />
-
-                        {{-- Preview --}}
-                        <template x-if="preview">
-                            <div class="relative">
-                                <img :src="preview" alt="Featured Image"
-                                    class="w-full h-64 object-cover rounded-xl shadow-lg" />
-
-                                <button type="button" @click.stop="clear()"
-                                    class="absolute -top-2 -right-2 w-8 h-8 bg-white/90 backdrop-blur-sm
-                           hover:bg-red-500 text-gray-600 hover:text-white
-                           rounded-full flex items-center justify-center shadow-lg
-                           hover:shadow-xl transition-all duration-300 ease-out
-                           hover:scale-110 border border-gray-200/50 hover:border-red-500"
-                                    title="Remove Image">
-                                    <svg class="w-4 h-4 transition-transform duration-200 hover:rotate-90"
-                                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                            d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
-                            </div>
+                        <!-- error -->
+                        <template x-if="error">
+                            <p class="text-sm text-red-600 mb-2" x-text="error"></p>
                         </template>
 
-                        {{-- Upload Placeholder --}}
-                        <template x-if="!preview">
-                            <div class="text-center">
-                                <div
-                                    class="w-16 h-16 mx-auto mb-4 bg-gray-200 dark:bg-gray-600
-                           rounded-full flex items-center justify-center
-                           group-hover:bg-blue-100 transition-colors">
-                                    <svg class="w-8 h-8 text-gray-400 group-hover:text-blue-500" fill="none"
-                                        stroke="currentColor" viewBox="0 0 24 24">
+                        <div @drop.prevent="onDrop($event)" @dragover.prevent="isDragging = true"
+                            @dragleave.prevent="isDragging = false" @click="$refs.mainInput.click()"
+                            :class="isDragging ? 'border-blue-400 bg-blue-50' : 'border-gray-300'"
+                            class="relative border-2 border-dashed rounded-2xl p-8 bg-gray-50 dark:bg-gray-700 cursor-pointer
+                   transition-all duration-200 hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-gray-600 group">
+                            {{-- IMPORTANT: name="image" (News) --}}
+                            <input type="file" name="image" x-ref="mainInput" accept="image/*" class="hidden"
+                                @change="onChange($event)">
+
+                            <!-- Preview -->
+                            <template x-if="preview">
+                                <div class="relative">
+                                    <img :src="preview" alt="Featured Image"
+                                        class="w-full h-64 object-cover rounded-xl shadow-lg" />
+
+                                    <button type="button" @click.stop="clear()"
+                                        class="absolute -top-2 -right-2 w-8 h-8 bg-white/90 backdrop-blur-sm
+                               hover:bg-red-500 text-gray-600 hover:text-white
+                               rounded-full flex items-center justify-center shadow-lg
+                               hover:shadow-xl transition-all duration-300 ease-out
+                               hover:scale-110 border border-gray-200/50 hover:border-red-500"
+                                        title="Remove Image">
+                                        <svg class="w-4 h-4 transition-transform duration-200 hover:rotate-90"
+                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                                d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </template>
+
+                            <!-- Empty -->
+                            <template x-if="!preview">
+                                <div class="text-center">
+                                    <div
+                                        class="w-16 h-16 mx-auto mb-4 bg-gray-200 dark:bg-gray-600 rounded-full
+                                flex items-center justify-center group-hover:bg-blue-100 transition-colors">
+                                        <svg class="w-8 h-8 text-gray-400 group-hover:text-blue-500" fill="none"
+                                            stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                        </svg>
+                                    </div>
+                                    <p class="text-gray-600 dark:text-gray-300 font-medium mb-1">Upload Featured Image
+                                    </p>
+                                    <p class="text-sm text-gray-500">PNG, JPG up to 5MB</p>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    {{-- Gallery Images (News) --}}
+                    <div x-data="productGalleryUpload({ maxMB: 5, maxImages: 4 })">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                            Gallery Images (Maximum 4 images)
+                        </label>
+
+                        <!-- error -->
+                        <template x-if="error">
+                            <p class="text-sm text-red-600 mb-3" x-text="error"></p>
+                        </template>
+
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                            <template x-for="(item, index) in gallery" :key="index">
+                                <div class="aspect-square">
+                                    <!-- Empty slot -->
+                                    <template x-if="item === null">
+                                        <div @drop.prevent="onDropToSlot($event, index)"
+                                            @dragover.prevent="isDragging = true"
+                                            @dragleave.prevent="isDragging = false" @click="openPicker()"
+                                            :class="isDragging ? 'border-blue-400 bg-blue-50' : 'border-gray-300'"
+                                            class="w-full h-full border-2 border-dashed rounded-xl bg-gray-50 dark:bg-gray-700 cursor-pointer
+                                   transition-all duration-200 hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-gray-600
+                                   flex flex-col items-center justify-center group">
+                                            <div
+                                                class="w-8 h-8 bg-gray-200 dark:bg-gray-600 rounded-full flex items-center justify-center mb-2
+                                        group-hover:bg-blue-100 transition-colors">
+                                                <svg class="w-4 h-4 text-gray-400 group-hover:text-blue-500"
+                                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                                </svg>
+                                            </div>
+                                            <span class="text-xs text-gray-500 text-center px-1"
+                                                x-text="`Image ${index + 1}`"></span>
+                                        </div>
+                                    </template>
+
+                                    <!-- Preview -->
+                                    <template x-if="item !== null">
+                                        <div class="relative w-full h-full group">
+                                            <img :src="item.url" :alt="`Gallery Image ${index + 1}`"
+                                                class="w-full h-full object-cover rounded-xl shadow-md" />
+
+                                            <button type="button" @click.stop="removeImage(index)"
+                                                class="absolute -top-2 -right-2 w-6 h-6 bg-white/95 backdrop-blur-sm
+                                       hover:bg-red-500 text-gray-600 hover:text-white rounded-full
+                                       flex items-center justify-center shadow-md hover:shadow-lg
+                                       opacity-0 group-hover:opacity-100 transition-all duration-300 ease-out
+                                       hover:scale-125 border border-gray-200/50 hover:border-red-500"
+                                                title="Remove Image">
+                                                <svg class="w-3 h-3 transition-all duration-200" fill="none"
+                                                    stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+
+                        {{-- IMPORTANT: name="gallery_images[]" (News) --}}
+                        <input type="file" name="gallery_images[]" multiple x-ref="galleryInput" accept="image/*"
+                            class="hidden" @change="onPick($event)">
+
+                        <div class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+                            <div class="flex items-start space-x-3">
+                                <div class="flex-shrink-0">
+                                    <svg class="w-5 h-5 text-blue-500 mt-0.5" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                 </div>
-                                <p class="text-gray-600 dark:text-gray-300 font-medium mb-1">Upload Featured Image</p>
-                                <p class="text-sm text-gray-500">PNG, JPG up to 5MB</p>
+                                <div class="text-sm">
+                                    <p class="text-blue-700 dark:text-blue-300 font-medium">Upload Tips:</p>
+                                    <ul class="text-blue-600 dark:text-blue-400 mt-1 space-y-1">
+                                        <li>• Click on any empty slot to upload images</li>
+                                        <li>• Drag and drop images directly onto slots</li>
+                                        <li>• Supported formats: PNG, JPG, JPEG</li>
+                                        <li>• Maximum file size: 5MB per image</li>
+                                        <li>• Maximum images: 4</li>
+                                    </ul>
+                                </div>
                             </div>
-                        </template>
+                        </div>
                     </div>
                 </div>
 

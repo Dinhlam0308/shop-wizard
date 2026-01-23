@@ -11,7 +11,7 @@ class WorkshopController extends Controller
     public function index()
     {
         try {
-            $workshops = \App\Models\Workshop::paginate(10);
+            $workshops = DB::table('workshops')->orderByDesc('date')->paginate(10);
             return view('user.workshop.index', compact('workshops'));
         } catch (\Exception $e) {
             return redirect()->back()
@@ -143,7 +143,7 @@ class WorkshopController extends Controller
             Cloudinary::uploadApi()->destroy($workshop->public_id);
             $workshop->delete();
             DB::commit();
-            return redirect()->route('admin.workshop.index')->with('success', 'Workshop deleted successfully.');
+            return redirect()->back()->with('success', 'Workshop deleted successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()

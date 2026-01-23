@@ -14,7 +14,7 @@ class BookingController extends Controller
             $search = $request->input('search');
             $bookings = \App\Models\Booking::when($search, function ($query, $search) {
                 return $query->where('id', $search);
-            })->paginate(10);
+            })->orderByDesc('created_at')->paginate(10);
             return view("admin.booking.index", compact("bookings"));
         } catch (\Exception $e) {
             return redirect()->back()
@@ -56,33 +56,60 @@ class BookingController extends Controller
     {
         try {
             DB::beginTransaction();
+
+            $user = $request->user();
+
             $validated = $request->validate([
-                'user_id' => 'required|exists:users,id',
-                'type' => ['required', Rule::in(['table', 'position_class', 'tarot', "event_table"])],
-                'booking_date' => 'required|date',
+                'user_id' => 'nullable|exists:users,id',
+
+                'name'  => 'required|string|max:100',
+                'phone' => 'required|string|max:20',
+
+                // guest mới bắt buộc email
+                'email' => $user ? 'nullable|email|max:255' : 'required|email|max:255',
+
+                'type' => ['required', Rule::in(['table', 'potion_class', 'tarot', 'event_table'])],
+                'booking_date' => 'required',
                 'booking_time' => 'required',
                 'people_count' => 'required|integer|min:1',
-                'note' => 'nullable|string'
+                'note' => 'nullable|string',
             ]);
 
-            if (\Carbon\Carbon::createFromFormat('d-m-Y', $validated['booking_date'])) {
-                $validated['booking_date'] = \Carbon\Carbon::createFromFormat('d-m-Y', $validated['booking_date'])->format('Y-m-d');
+            // user_id: ưu tiên auth, không tin hidden input từ client
+            $validated['user_id'] = $user?->id;
+
+            // email: auth thì lấy từ user, guest lấy từ form
+            $validated['email'] = $user?->email ?? $validated['email'];
+
+            // parse date/time (flatpickr của bạn đang d-m-Y và H:i)
+            try {
+                $validated['booking_date'] = \Carbon\Carbon::createFromFormat('d-m-Y', $validated['booking_date'])
+                    ->format('Y-m-d');
+            } catch (\Exception $e) {
+                // fallback nếu request gửi chuẩn Y-m-d
+                $validated['booking_date'] = \Carbon\Carbon::parse($validated['booking_date'])->format('Y-m-d');
             }
 
-            if (\Carbon\Carbon::createFromFormat('H:i', $validated['booking_time'])) {
-                $validated['booking_time'] = \Carbon\Carbon::createFromFormat('H:i', $validated['booking_time'])->format('H:i:s');
+            try {
+                $validated['booking_time'] = \Carbon\Carbon::createFromFormat('H:i', $validated['booking_time'])
+                    ->format('H:i:s');
+            } catch (\Exception $e) {
+                $validated['booking_time'] = \Carbon\Carbon::parse($validated['booking_time'])->format('H:i:s');
             }
 
-            \App\Models\Booking::create($validated);
+            $booking = \App\Models\Booking::create($validated);
 
-            $validated['email'] = $request->user()->email;
-            $validated['name']  = $request->user()->name;
-
-            \Mail::to($request->user()->email)->send(new \App\Mail\BookingFormSubmitted($validated));
             DB::commit();
 
-            return redirect()->back()
-                ->with('success', 'Đặt lịch thành công.');
+            dispatch(function () use ($validated, $booking) {
+                \Mail::to($validated['email'])
+                    ->cc(config('mail.from.address'))
+                    ->send(new \App\Mail\BookingFormSubmitted([
+                        ...$validated,
+                        'booking_id' => $booking->id,
+                    ]));
+            })->afterResponse();
+            return redirect()->back()->with('success', 'Đặt lịch thành công.');
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()
@@ -123,7 +150,10 @@ class BookingController extends Controller
             $booking = \App\Models\Booking::findOrFail($id);
 
             $validated = $request->validate([
-                'type' => ['required', Rule::in(['table', 'potion_class', 'tarot', "event_table"])],
+                'name' => 'required|string|max:100',
+                'phone' => 'required|string|max:20',
+
+                'type' => ['required', Rule::in(['table', 'position_class', 'tarot', 'event_table'])],
                 'booking_date' => 'required|date',
                 'booking_time' => 'required',
                 'people_count' => 'required|integer|min:1',
@@ -133,13 +163,17 @@ class BookingController extends Controller
 
             $booking->update($validated);
 
-            if ($request->has('status') && $request->input('status') === 'confirmed') {
-                \Mail::to($booking->user->email)->send(new \App\Mail\BookingConfirmed($booking));
-            }
+            dispatch(function () use ($request, $booking) {
+                if ($request->input('status') === 'confirmed') {
+                    \Mail::to($booking->user->email)->cc(config('mail.from.address'))
+                        ->send(new \App\Mail\BookingConfirmed($booking));
+                }
 
-            if ($request->has('status') && $request->input('status') === 'cancelled') {
-                \Mail::to($booking->user->email)->send(new \App\Mail\BookingCancelled($booking));
-            }
+                if ($request->input('status') === 'cancelled') {
+                    \Mail::to($booking->user->email)->cc(config('mail.from.address'))
+                        ->send(new \App\Mail\BookingCancelled($booking));
+                }
+            })->afterResponse();
 
             return redirect()->route('admin.booking.index')
                 ->with('success', 'Booking updated successfully.');

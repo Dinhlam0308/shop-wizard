@@ -20,4 +20,9 @@ class News extends Model
         'image',
         'public_id',
     ];
+
+    public function images()
+    {
+        return $this->hasMany(\App\Models\NewsImage::class);
+    }
 }

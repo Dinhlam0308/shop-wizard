@@ -32,6 +32,13 @@
                             ? $workshop->image
                             : asset('storage/' . $workshop->image))
                         : 'https://picsum.photos/600/400?random=' . rand(1, 1000);
+
+                    $workshopAt = null;
+                    if (!empty($workshop->date)) {
+                        $time = !empty($workshop->time) ? $workshop->time : '23:59:59';
+                        $workshopAt = \Carbon\Carbon::parse($workshop->date . ' ' . $time);
+                    }
+                    $isExpired = $workshopAt ? $workshopAt->isPast() : false;
                 @endphp
 
                 <article
@@ -41,9 +48,6 @@
                             hover:shadow-[0_10px_50px_rgba(212,175,55,0.25)]
                             hover:border-amber-400/30 hover:-translate-y-1
                             transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)]">
-
-                    <a href="{{ route('user.workshop.show', $workshop->id) }}" class="absolute inset-0 z-10"
-                        aria-label="View workshop details"></a>
                     {{-- Hình ảnh --}}
                     <div class="relative aspect-[4/3] overflow-hidden">
                         <img src="{{ $image }}" alt="{{ $workshop->title }}"
@@ -60,6 +64,17 @@
                             <i data-lucide="calendar" class="w-3.5 h-3.5 inline-block mr-1"></i>
                             {{ \Carbon\Carbon::parse($workshop->date)->format('d/m/Y') }}
                         </span>
+
+                        {{-- Tag quá hạn --}}
+                        @if ($isExpired)
+                            <span
+                                class="absolute top-4 right-4 px-3 py-1.5 text-xs font-semibold rounded-full
+               bg-rose-600/25 text-rose-200 border border-rose-400/30 bg-gray-800
+               backdrop-blur-md shadow-[0_0_18px_rgba(244,63,94,0.25)]">
+                                <i data-lucide="ban" class="w-3.5 h-3.5 inline-block mr-1"></i>
+                                <span data-vi="Quá hạn" data-en="Expired"></span>
+                            </span>
+                        @endif
                     </div>
 
                     {{-- Nội dung --}}
@@ -96,7 +111,7 @@
                                         {{ number_format($workshop->price, 0, ',', '.') }}₫
                                     </div>
                                 </div>
-                                <a href="{{ route('user.workshop_registrations.create', $workshop->id) }}"
+                                <a href="{{ route('user.workshop.show', $workshop->id) }}"
                                     class="px-4 py-2 rounded-xl text-sm font-semibold text-gray-900
                                            bg-gradient-to-r from-amber-300 via-amber-400 to-yellow-500
                                            shadow-[0_4px_20px_rgba(212,175,55,0.25)]
@@ -104,7 +119,7 @@
                                            hover:scale-[1.03]
                                            transition-all duration-300 ease-out">
                                     <i data-lucide="ticket" class="w-4 h-4 inline-block mr-1"></i>
-                                    <span data-vi="Đăng ký" data-en="Register"></span>
+                                    <span data-vi="Chi tiết" data-en="Details"></span>
                                 </a>
                             </div>
                         </div>

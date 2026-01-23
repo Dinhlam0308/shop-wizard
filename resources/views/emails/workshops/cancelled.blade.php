@@ -1,15 +1,24 @@
 <x-mail::message>
-# ❌ Hủy Đăng Ký Workshop
+# Registration Canceled
 
-Xin chào **{{ $registration->name }}**,  
-Chúng tôi rất tiếc phải thông báo rằng đăng ký của bạn cho **{{ $registration->workshop->title }}** đã bị **hủy**.
+Hi **{{ $registration->name }}**,  
+We’re sorry to inform you that your registration for **{{ $registration->workshop->title }}** has been **canceled**.
 
-Nếu đây là sự nhầm lẫn hoặc bạn muốn đăng ký lại, vui lòng liên hệ với chúng tôi để được hỗ trợ.
+---
 
-<x-mail::button :url="url('/')">
-Truy Cập Always Café
+### 🗓 Workshop Details
+- **Date:** {{ \Carbon\Carbon::parse($registration->workshop->date)->format('d/m/Y') }}
+- **Time:** {{ $registration->workshop->time ?? 'To be updated' }}
+- **Location:** {{ $registration->workshop->location ?? 'To be updated' }}
+
+---
+
+If you believe this was a mistake or you’d like to register again, simply reply to this email and our team will assist you.
+
+<x-mail::button :url="url('/workshops/' . $registration->workshop_id)">
+View Workshop Info
 </x-mail::button>
 
-Cảm ơn bạn đã thông cảm và đồng hành cùng chúng tôi,  
-**Đội Ngũ Workshop Always Café**
+Thank you for your understanding,  
+— **Always Café Workshop Team**
 </x-mail::message>

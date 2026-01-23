@@ -28,11 +28,10 @@
                                font-[Playfair_Display] font-semibold bg-gradient-to-r 
                                from-amber-300 via-yellow-400 to-amber-500 bg-clip-text 
                                text-transparent drop-shadow-[0_0_10px_rgba(255,215,0,0.3)]">
-                        <i data-lucide="mail" class="w-7 h-7 text-amber-400"></i>
-                        <span data-vi="Liên hệ Always Café" data-en="Contact Always Café"></span>
+                        <span data-vi="Liên hệ" data-en="Contact"></span>
                     </h1>
                     <p class="text-stone-300/80 mt-3 text-sm md:text-base">
-                        <span data-vi="Chúng tôi rất vui được nghe từ bạn! Hãy gửi cho chúng tôi lời nhắn." data-en="We'd love to hear from you! Send us a message."></span>
+                        <span data-vi="Chúng tôi rất vui khi được lắng nghe bạn!" data-en="We'd love to hear from you! Send us a message."></span>
                     </p>
                 </div>
 
@@ -54,6 +53,16 @@
                     <div>
                         <label class="hp-caption text-amber-200/90 mb-2 block"><span data-vi="Email" data-en="Email"></span></label>
                         <input type="email" name="email" data-placeholder-vi="Nhập địa chỉ email" data-placeholder-en="Enter your email address" required
+                            class="w-full px-4 py-3 rounded-2xl border border-amber-400/30 
+                                   bg-stone-900/70 text-amber-500 placeholder-amber-300/40
+                                   focus:ring-2 focus:ring-amber-400/70 focus:border-amber-400/70
+                                   focus:outline-none transition-all duration-300">
+                    </div>
+
+                    {{-- Phone --}}
+                    <div>
+                        <label class="hp-caption text-amber-200/90 mb-2 block"><span data-vi="Số điện thoại" data-en="Phone Number"></span></label>
+                        <input type="text" name="phone" data-placeholder-vi="Nhập số điện thoại" required data-placeholder-en="Enter your phone number"
                             class="w-full px-4 py-3 rounded-2xl border border-amber-400/30 
                                    bg-stone-900/70 text-amber-500 placeholder-amber-300/40
                                    focus:ring-2 focus:ring-amber-400/70 focus:border-amber-400/70

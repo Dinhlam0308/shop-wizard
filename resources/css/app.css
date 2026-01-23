@@ -28,12 +28,27 @@ body,
     }
 }
 
-/* Optimized selective transitions - only essential properties */
-* {
-    transition-property: background-color, color, border-color, opacity;
-    transition-timing-function: var(--transition-fast);
-    transition-duration: var(--transition-fast);
+/* ✅ Global transition "safe" (không giết UX, vẫn nhẹ hơn) */
+:where(html, body, button, a, input, textarea, select, [role="button"], .hp-card) {
+    transition-property: background-color, color, border-color, opacity, box-shadow, transform, filter;
+    transition-duration: 220ms;
+    transition-timing-function: var(--apple-ease);
 }
+
+/* ✅ Không ép transition cho ảnh/video (đỡ lag) */
+img,
+video,
+svg {
+    transition: none !important;
+}
+
+/* ✅ Không để "all" */
+* {
+    transition-property: inherit;
+    transition-duration: inherit;
+    transition-timing-function: inherit;
+}
+
 
 /* GPU-accelerated root elements */
 html {
@@ -716,85 +731,87 @@ li {
 /* container nút */
 .heroPrev,
 .heroNext {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 30;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 30;
 
-  width: 44px;
-  height: 44px;
-  border-radius: 9999px;
+    width: 44px;
+    height: 44px;
+    border-radius: 9999px;
 
-  display: grid;
-  place-items: center;
+    display: grid;
+    place-items: center;
 
-  cursor: pointer;
-  user-select: none;
+    cursor: pointer;
+    user-select: none;
 
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.08);
 
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
 
-  box-shadow:
-    0 10px 30px rgba(0, 0, 0, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
 
-  transition: transform 250ms ease, box-shadow 250ms ease, background 250ms ease,
-    border-color 250ms ease, opacity 250ms ease;
+    transition: transform 250ms ease, box-shadow 250ms ease, background 250ms ease,
+        border-color 250ms ease, opacity 250ms ease;
 }
 
 /* vị trí */
 .heroPrev {
-  left: 16px;
+    left: 16px;
 }
+
 .heroNext {
-  right: 16px;
+    right: 16px;
 }
 
 /* icon mũi tên tạo bằng pseudo */
 .heroPrev::before,
 .heroNext::before {
-  content: "";
-  width: 10px;
-  height: 10px;
-  border-top: 2px solid rgba(255, 255, 255, 0.85);
-  border-right: 2px solid rgba(255, 255, 255, 0.85);
-  transform: rotate(135deg); /* mặc định là "Prev" */
-  transition: transform 250ms ease, opacity 250ms ease;
+    content: "";
+    width: 10px;
+    height: 10px;
+    border-top: 2px solid rgba(255, 255, 255, 0.85);
+    border-right: 2px solid rgba(255, 255, 255, 0.85);
+    transform: rotate(135deg);
+    /* mặc định là "Prev" */
+    transition: transform 250ms ease, opacity 250ms ease;
 }
 
 /* Next arrow rotate khác */
 .heroNext::before {
-  transform: rotate(-45deg);
+    transform: rotate(-45deg);
 }
 
 /* hover effect */
 .heroPrev:hover,
 .heroNext:hover {
-  transform: translateY(-50%) scale(1.06);
+    transform: translateY(-50%) scale(1.06);
 
-  border-color: rgba(255, 215, 0, 0.45);
-  background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 215, 0, 0.45);
+    background: rgba(255, 255, 255, 0.12);
 
-  box-shadow:
-    0 14px 40px rgba(0, 0, 0, 0.4),
-    0 0 28px rgba(255, 215, 0, 0.18),
-    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    box-shadow:
+        0 14px 40px rgba(0, 0, 0, 0.4),
+        0 0 28px rgba(255, 215, 0, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 
 /* active (click) */
 .heroPrev:active,
 .heroNext:active {
-  transform: translateY(-50%) scale(0.98);
+    transform: translateY(-50%) scale(0.98);
 }
 
 /* ẩn nút khi disabled */
 .heroPrev.swiper-button-disabled,
 .heroNext.swiper-button-disabled {
-  opacity: 0.35;
-  pointer-events: none;
+    opacity: 0.35;
+    pointer-events: none;
 }
 
 /* =========================================
@@ -803,49 +820,51 @@ li {
 
 .heroSwiper .heroPrev,
 .heroSwiper .heroNext {
-  opacity: 0;
-  transform: translateY(-50%) scale(0.96);
+    opacity: 0;
+    transform: translateY(-50%) scale(0.96);
 }
 
 .heroSwiper:hover .heroPrev,
 .heroSwiper:hover .heroNext {
-  opacity: 1;
-  transform: translateY(-50%) scale(1);
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
 }
 
 /* =========================================
    Mobile tuning
 ========================================= */
 @media (max-width: 640px) {
-  .heroPrev,
-  .heroNext {
-    width: 40px;
-    height: 40px;
-  }
 
-  .heroPrev {
-    left: 10px;
-  }
-  .heroNext {
-    right: 10px;
-  }
+    .heroPrev,
+    .heroNext {
+        width: 40px;
+        height: 40px;
+    }
+
+    .heroPrev {
+        left: 10px;
+    }
+
+    .heroNext {
+        right: 10px;
+    }
 }
 
 .heroSwiper .swiper-pagination-bullet {
-  width: 7px;
-  height: 7px;
-  opacity: 0.45;
-  background: rgba(255, 255, 255, 0.75);
-  transition: transform 200ms ease, opacity 200ms ease;
+    width: 7px;
+    height: 7px;
+    opacity: 0.45;
+    background: rgba(255, 255, 255, 0.75);
+    transition: transform 200ms ease, opacity 200ms ease;
 }
 
 .heroSwiper .swiper-pagination-bullet-active {
-  opacity: 1;
-  transform: scale(1.25);
-  background: rgba(255, 215, 0, 0.95);
-  box-shadow: 0 0 20px rgba(255, 215, 0, 0.35);
+    opacity: 1;
+    transform: scale(1.25);
+    background: rgba(255, 215, 0, 0.95);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.35);
 }
 
 .heroSwiper .swiper-pagination {
-  bottom: 14px !important;
+    bottom: 14px !important;
 }

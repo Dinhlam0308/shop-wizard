@@ -33,7 +33,18 @@
                        flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6
                        group transition-all duration-500 hover:scale-[1.02]">
                 <div class="flex-1">
-                    <p class="text-amber-100 font-medium text-base sm:text-lg" x-text="it.name"></p>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <p class="text-amber-100 font-medium text-base sm:text-lg" x-text="it.name"></p>
+
+                        <template x-if="it.is_rental">
+                            <span
+                                class="inline-flex text-xs items-center gap-1.5 px-2.5 py-1 rounded-full
+                   bg-stone-800/60 border border-stone-700/60 text-stone-200">
+                                <i data-lucide="key-round" class="w-3.5 h-3.5"></i>
+                                <span data-vi="RENTAL" data-en="RENTAL"></span>
+                            </span>
+                        </template>
+                    </div>
 
                     <!-- Variant info -->
                     <template x-if="it.variant_id">
@@ -168,6 +179,14 @@
                 <div class="text-right order-1 sm:order-2 w-full sm:w-auto">
                     <p class="text-stone-400/70 text-sm"><span data-vi="Tổng cộng" data-en="Total"></span></p>
                     <p class="text-amber-200 text-2xl font-bold truncate" x-text="formatMoney(total)"></p>
+                    <template x-if="anyRental">
+                        <p
+                            class="mt-2 text-xs text-amber-200/80 bg-amber-400/10 border border-amber-400/20 rounded-xl px-3 py-2">
+                            <span
+                                data-vi="Lưu ý: Giá sản phẩm thuê sẽ + thêm 100% tiền cọc. Sau khi hoàn trả, tiền cọc sẽ được hoàn lại."
+                                data-en="Note: Rental items require a 100% deposit. The deposit will be refunded after return."></span>
+                        </p>
+                    </template>
 
                     <form method="POST" id="orderForm" action="{{ route('user.order.store') }}">
                         @csrf

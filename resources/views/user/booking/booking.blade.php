@@ -45,7 +45,7 @@
                            transition-all duration-700 ease-[var(--apple-ease)]
                            hover:shadow-[0_0_80px_rgba(212,175,55,0.2)]">
                     @csrf
-                    <input type="hidden" name="user_id" value="{{ auth()->id() }}">
+                    <input type="hidden" name="user_id" value="{{ auth()->id() ?? '' }}">
 
                     {{-- 🕯️ Header --}}
                     <header class="text-center mb-10">
@@ -81,7 +81,7 @@
                                            focus:ring-2 focus:ring-amber-400/70 focus:border-amber-400
                                            transition-all duration-300 shadow-inner">
                                     <option value="" class="text-gray-400" data-vi="-- Chọn loại --"
-                                            data-en="-- Select Type --"></option>
+                                        data-en="-- Select Type --"></option>
                                     <option value="table" data-vi="Bàn cà phê" data-en="Coffee Table"></option>
                                     <option value="potion_class" data-vi="Lớp học Potion" data-en="Potion Class">
                                     </option>
@@ -91,10 +91,74 @@
                             </div>
                         </div>
 
+                        {{-- Full Name + Phone --}}
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {{-- Full Name --}}
+                            <div class="space-y-2">
+                                <label class="text-sm font-medium text-gray-200">
+                                    <span data-vi="Họ và tên" data-en="Full Name"></span>
+                                </label>
+
+                                <div class="relative">
+                                    <i data-lucide="user"
+                                        class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-amber-300/80"></i>
+
+                                    <input type="text" name="name"
+                                        value="{{ old('name', auth()->user()->name ?? '') }}" required
+                                        class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-700/60 bg-gray-900/60
+                          text-gray-100 placeholder-amber-300/70
+                          focus:ring-2 focus:ring-amber-400/70 focus:border-amber-400
+                          transition-all duration-300 shadow-inner"
+                                        data-placeholder-vi="Nhập họ và tên" data-placeholder-en="Enter your full name">
+                                </div>
+                            </div>
+
+                            {{-- Phone Number --}}
+                            <div class="space-y-2">
+                                <label class="text-sm font-medium text-gray-200">
+                                    <span data-vi="Số điện thoại" data-en="Phone Number"></span>
+                                </label>
+
+                                <div class="relative">
+                                    <i data-lucide="phone"
+                                        class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-rose-300/80"></i>
+
+                                    <input type="text" name="phone" value="{{ old('phone') }}" required
+                                        class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-700/60 bg-gray-900/60
+                          text-gray-100 placeholder-amber-300/70
+                          focus:ring-2 focus:ring-rose-400/70 focus:border-rose-400
+                          transition-all duration-300 shadow-inner"
+                                        data-placeholder-vi="Nhập số điện thoại"
+                                        data-placeholder-en="Enter phone number">
+                                </div>
+                            </div>
+                        </div>
+                        @guest
+                            <div class="space-y-2">
+                                <label class="text-sm font-medium text-gray-200">
+                                    <span data-vi="Email" data-en="Email"></span>
+                                </label>
+
+                                <div class="relative">
+                                    <i data-lucide="mail"
+                                        class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-purple-300/80"></i>
+
+                                    <input type="email" name="email" value="{{ old('email') }}" required
+                                        class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-700/60 bg-gray-900/60
+                   text-gray-100 placeholder-amber-300/70
+                   focus:ring-2 focus:ring-purple-400/70 focus:border-purple-400
+                   transition-all duration-300 shadow-inner"
+                                        data-placeholder-vi="Nhập email để nhận xác nhận"
+                                        data-placeholder-en="Enter email to receive confirmation">
+                                </div>
+                            </div>
+                        @endguest
+
+
                         {{-- Date (flatpickr giống Tarot) --}}
                         <div class="space-y-2">
-                            <label for="booking_date" class="text-sm font-medium text-gray-200"><span data-vi="Ngày đặt"
-                                    data-en="Booking Date"></span></label>
+                            <label for="booking_date" class="text-sm font-medium text-gray-200"><span
+                                    data-vi="Ngày đặt" data-en="Booking Date"></span></label>
                             <div class="relative">
                                 <svg class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-amber-300/80"
                                     xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -114,8 +178,8 @@
 
                         {{-- Time (flatpickr giống Tarot) --}}
                         <div class="space-y-2">
-                            <label for="booking_time" class="text-sm font-medium text-gray-200"><span data-vi="Giờ đặt"
-                                    data-en="Booking Time"></span></label>
+                            <label for="booking_time" class="text-sm font-medium text-gray-200"><span
+                                    data-vi="Giờ đặt" data-en="Booking Time"></span></label>
                             <div class="relative">
                                 <svg class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-rose-300/80"
                                     xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"

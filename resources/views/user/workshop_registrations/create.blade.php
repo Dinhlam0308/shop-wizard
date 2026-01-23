@@ -41,25 +41,40 @@
                 <form method="POST" action="{{ route('user.workshop_registrations.store') }}" class="space-y-6">
                     @csrf
 
-                    {{-- Workshop selection --}}
+                    {{-- Workshop (Locked / Read-only) --}}
                     <div>
                         <label class="hp-caption text-amber-200/90 mb-2 block">
-                            <span data-vi="Chọn Workshop" data-en="Select Workshop"></span>
-                            <select name="workshop_id" required
-                                class="w-full px-4 py-3 rounded-2xl border border-amber-400/30 
-                                   bg-stone-900/70 text-amber-500 placeholder-amber-300/40
-                                   focus:ring-2 focus:ring-amber-400/70 focus:border-amber-400/70
-                                   focus:outline-none transition-all duration-300">
-                                <option value="">
-                                    <span data-vi="-- Chọn Workshop --" data-en="-- Select Workshop --"></span>
-                                </option>
-                                @foreach (\App\Models\Workshop::orderBy('date')->get() as $workshop)
-                                    <option value="{{ $workshop->id }}">
-                                        {{ $workshop->title }} —
-                                        {{ \Carbon\Carbon::parse($workshop->date)->format('M d, Y') }}
-                                    </option>
-                                @endforeach
-                            </select>
+                            <span data-vi="Workshop đã chọn" data-en="Selected Workshop"></span>
+                        </label>
+
+                        {{-- UI: show as read-only field --}}
+                        <div
+                            class="w-full px-4 py-3 rounded-2xl border border-amber-400/30 
+                bg-stone-900/70 text-amber-100
+                flex items-center justify-between gap-3">
+                            <div class="min-w-0">
+                                <div class="font-semibold truncate">
+                                    {{ $match->title }}
+                                </div>
+                                <div class="text-sm text-amber-300/70">
+                                    {{ \Carbon\Carbon::parse($match->date)->format('M d, Y') }}
+                                    @if ($match->time)
+                                        • {{ $match->time }}
+                                    @endif
+                                    @if ($match->location)
+                                        • {{ $match->location }}
+                                    @endif
+                                </div>
+                            </div>
+
+                            <span
+                                class="text-xs px-3 py-1 rounded-full bg-amber-400/10 border border-amber-400/20 text-amber-200">
+                                Locked
+                            </span>
+                        </div>
+
+                        {{-- IMPORTANT: send workshop_id --}}
+                        <input type="hidden" name="workshop_id" value="{{ $match->id }}">
                     </div>
 
                     {{-- Name --}}
@@ -90,10 +105,10 @@
                     {{-- Phone --}}
                     <div>
                         <label class="hp-caption text-amber-200/90 mb-2 block">
-                            <span data-vi="Số điện thoại (tuỳ chọn)" data-en="Phone Number (Optional)"></span>
+                            <span data-vi="Số điện thoại" data-en="Phone Number"></span>
                         </label>
                         <input type="text" name="phone" data-placeholder-vi="Nhập số điện thoại"
-                            data-placeholder-en="Enter your phone number"
+                            data-placeholder-en="Enter your phone number" required
                             class="w-full px-4 py-3 rounded-2xl border border-amber-400/30 
                                    bg-stone-900/70 text-amber-500 placeholder-amber-300/40
                                    focus:ring-2 focus:ring-amber-400/70 focus:border-amber-400/70
@@ -117,10 +132,11 @@
                     <div class="flex justify-center pt-8">
                         <button type="submit" x-data="loadingButton" @click="handleClick" data-loading
                             class="inline-flex items-center gap-2 rounded-2xl px-10 py-4 
-               bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-600 
-               text-black font-semibold text-base
-               shadow-[0_0_25px_rgba(255,215,0,0.4)] hover:shadow-[0_0_40px_rgba(255,215,0,0.6)]
-               hover:scale-[1.05] active:scale-[0.98] transition-all duration-500 ease-out">
+            bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-600 
+            text-black font-semibold text-base
+            shadow-[0_0_25px_rgba(255,215,0,0.4)] hover:shadow-[0_0_40px_rgba(255,215,0,0.6)]
+            hover:scale-[1.05] active:scale-[0.98] transition-all duration-500 ease-out">
+
                             <i data-lucide="ticket" class="w-5 h-5"></i>
                             <span data-vi="Đăng Ký Ngay" data-en="Register Now"></span>
                         </button>

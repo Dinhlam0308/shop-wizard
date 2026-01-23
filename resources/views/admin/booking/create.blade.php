@@ -39,12 +39,61 @@
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Booking Type
                     </label>
-                    <input type="text" name="type" value="{{ old('type') }}"
+
+                    <select name="type"
                         class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 
-                               bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100
-                               focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 
-                               focus:outline-none transition-all duration-300"
-                        placeholder="e.g., Restaurant, Hotel, Event">
+               bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100
+               focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 
+               focus:outline-none transition-all duration-300">
+                        <option value="" disabled {{ old('type') ? '' : 'selected' }}>
+                            -- Select Booking Type --
+                        </option>
+
+                        <option value="table" {{ old('type') === 'table' ? 'selected' : '' }}>
+                            Table Booking
+                        </option>
+
+                        <option value="potion_class" {{ old('type') === 'potion_class' ? 'selected' : '' }}>
+                            Potion / Position Class
+                        </option>
+
+                        <option value="tarot" {{ old('type') === 'tarot' ? 'selected' : '' }}>
+                            Tarot Reading
+                        </option>
+
+                        <option value="event_table" {{ old('type') === 'event_table' ? 'selected' : '' }}>
+                            Event Table
+                        </option>
+                    </select>
+                </div>
+
+                <!-- Full Name & Phone -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Full Name -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Full Name
+                        </label>
+                        <input type="text" name="name" value="{{ old('name', Auth::user()->name) }}"
+                            class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 
+                   bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100
+                   focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 
+                   focus:outline-none transition-all duration-300"
+                            placeholder="Enter full name">
+                    </div>
+
+                    <!-- Phone Number -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Phone Number
+                        </label>
+                        <input type="text" name="phone" value="{{ old('phone') }}"
+                            class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 
+                   bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100
+                   focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 
+                   focus:outline-none transition-all duration-300"
+                            placeholder="Enter phone number">
+                    </div>
                 </div>
 
                 <!-- Date & Time -->
@@ -104,7 +153,7 @@
                               hover:text-gray-900 dark:hover:text-white transition duration-300">
                         Cancel
                     </a>
-                    <button type="submit"  x-data="loadingButton" @click="handleClick" data-loading
+                    <button type="submit" x-data="loadingButton" @click="handleClick" data-loading
                         class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-gray-900 to-gray-800 
                                    dark:from-gray-100 dark:to-gray-300 
                                    text-white dark:text-gray-900 font-semibold text-sm 

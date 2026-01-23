@@ -12,11 +12,11 @@ class UserController extends Controller
     public function index(Request $request)
     {
         try {
-        $search = $request->input('search');
-        $users = User::when($search, function ($query, $search) {
-            return $query->where('id', $search);
-        })->paginate(10);
-        return view('admin.user.index', compact("users"));
+            $search = $request->input('search');
+            $users = User::when($search, function ($query, $search) {
+                return $query->where('id', $search);
+            })->paginate(10);
+            return view('admin.user.index', compact("users"));
         } catch (\Exception $e) {
             return redirect()->back()
                 ->withErrors(['error' => 'Failed to load users: ' . $e->getMessage()]);
@@ -54,35 +54,32 @@ class UserController extends Controller
         }
     }
 
-    public function show(int $id) 
+    public function show(int $id)
     {
         $user = User::findOrFail($id);
         return view('user.show')->with('user', $user);
     }
 
-    public function edit(int $id) 
+    public function edit(int $id)
     {
         $user = User::findOrFail($id);
         return view('admin.user.edit')->with('user', $user);
     }
 
-    public function update(Request $request, int $id) 
+    public function update(Request $request, int $id)
     {
         try {
             $user = User::findOrFail($id);
 
             $validator = Validator::make($request->all(), [
                 'name' => 'required|string|max:100',
-                'password' => 'nullable|min:6|confirmed'
+                'role' => 'required|in:admin,user',
             ]);
 
             $validated = $validator->validate();
 
             $user->name = $validated['name'];
-
-            if (!empty($validated['password'])) {
-                $user->password = Hash::make($validated['password']);
-            }
+            $user->role = $validated['role'];
 
             $user->save();
 
@@ -95,7 +92,7 @@ class UserController extends Controller
         }
     }
 
-    public function destroy(int $id) 
+    public function destroy(int $id)
     {
         try {
             $user = User::findOrFail($id);

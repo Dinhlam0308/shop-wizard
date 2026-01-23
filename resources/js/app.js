@@ -901,10 +901,11 @@ function initMenuSwipers() {
         clickable: true,
       },
       breakpoints: {
-        0: { slidesPerView: 1.15 },
-        480: { slidesPerView: 1.6 },
-        640: { slidesPerView: 2.2 },
-        1024: { slidesPerView: 4 },
+        0: { slidesPerView: 1.05 },
+        480: { slidesPerView: 1.2 },
+        640: { slidesPerView: 1.6 },
+        1024: { slidesPerView: 2 },   // ✅ đúng yêu cầu: 2 card
+        1280: { slidesPerView: 2 },   // ✅ vẫn 2 card
       },
     });
   }
@@ -940,10 +941,85 @@ document.addEventListener("alpine:init", () => {
   Alpine.data("markdownEditor", ({ initial = "" } = {}) => ({
     tab: "write",
     value: initial || "",
-    get previewHtml() {
+
+    galleryUrls: Array(4).fill(null),
+
+    previewHtml: "",
+
+    init() {
+      this.rebuildPreview();
+
+      this.$watch("value", () => this.rebuildPreview());
+
+      window.addEventListener("news-gallery-changed", (e) => {
+        const g = e?.detail?.gallery || [];
+        this.galleryUrls = (g || []).slice(0, 4).map((x) => (x ? x.url : null));
+        while (this.galleryUrls.length < 4) this.galleryUrls.push(null);
+
+        this.rebuildPreview();
+      });
+    },
+
+    insertImageCaptionMarker() {
+      let n = 1;
+      while (n <= 4 && new RegExp(`\\{\\{img:${n}(\\||\\}\\})`).test(this.value)) n++;
+      if (n > 4) n = 1;
+
+      this.insertAtCursor(`\n{{img:${n}|cap:Your caption here}}\n`);
+    },
+
+
+    insertAtCursor(text) {
+      const ta = this.$refs.ta;
+      if (!ta) return;
+
+      const start = ta.selectionStart ?? this.value.length;
+      const end = ta.selectionEnd ?? this.value.length;
+
+      this.value = this.value.slice(0, start) + text + this.value.slice(end);
+
+      this.$nextTick(() => {
+        ta.focus();
+        const pos = start + text.length;
+        ta.setSelectionRange(pos, pos);
+      });
+    },
+
+    rebuildPreview() {
       const esc = (s) =>
-        s.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+        (s || "")
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;");
+
       let s = esc(this.value);
+
+      s = s.replace(/\{\{img:(\d)(\|cap:([^}]+))?\}\}/g, (_m, d, _capPart, capText) => {
+        const idx = parseInt(d, 10) - 1;
+        const url = this.galleryUrls[idx];
+
+        if (!url) {
+          return `
+      <div class="my-3 p-3 rounded-lg border border-dashed text-xs text-gray-500 dark:text-gray-300">
+        (Image ${d} not selected yet)
+      </div>
+    `;
+        }
+
+        const cap = (capText || "").trim();
+        const capHtml = cap
+          ? `<figcaption class="mt-2 text-center text-[12px] leading-5 text-gray-500 dark:text-gray-300 italic">
+         ${cap.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")}
+       </figcaption>`
+          : "";
+
+        return `
+    <figure class="my-4">
+      <img src="${url}" alt="Gallery ${d}" class="w-full rounded-xl shadow-md"/>
+      ${capHtml}
+    </figure>
+  `;
+      });
 
       s = s
         .replace(/^###### (.*)$/gm, "<h6>$1</h6>")
@@ -960,7 +1036,7 @@ document.addEventListener("alpine:init", () => {
         .replace(/(<li>.*<\/li>\n?)+/g, (m) => `<ul>${m}</ul>`)
         .replace(/\n/g, "<br/>");
 
-      return s;
+      this.previewHtml = s;
     },
 
     wrap(left, right) {
@@ -974,30 +1050,34 @@ document.addEventListener("alpine:init", () => {
         ta.setSelectionRange(start + left.length, start + left.length + selected.length);
       });
     },
+
     prefix(p) {
       const ta = this.$refs.ta;
       const start = ta.selectionStart;
-      const lineStart = this.value.lastIndexOf('\n', start - 1) + 1;
+      const lineStart = this.value.lastIndexOf("\n", start - 1) + 1;
       this.value = this.value.slice(0, lineStart) + p + this.value.slice(lineStart);
       this.$nextTick(() => ta.focus());
     },
+
     codeBlock() {
       const ta = this.$refs.ta;
       const start = ta.selectionStart, end = ta.selectionEnd;
-      const selected = this.value.slice(start, end) || 'code here';
+      const selected = this.value.slice(start, end) || "code here";
       const insert = `\n\`\`\`php\n${selected}\n\`\`\`\n`;
       this.value = this.value.slice(0, start) + insert + this.value.slice(end);
       this.$nextTick(() => ta.focus());
     },
+
     insertLink() {
       const ta = this.$refs.ta;
       const start = ta.selectionStart, end = ta.selectionEnd;
-      const selected = this.value.slice(start, end) || 'link text';
+      const selected = this.value.slice(start, end) || "link text";
       const insert = `[${selected}](https://example.com)`;
       this.value = this.value.slice(0, start) + insert + this.value.slice(end);
       this.$nextTick(() => ta.focus());
     },
   }));
+
 });
 
 

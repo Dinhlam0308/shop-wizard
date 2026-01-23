@@ -56,11 +56,40 @@
                         {{ $news->title }}
                     </h1>
 
-                    {{-- Content --}}
+                    @php
+                        $galleryUrls = $galleryUrls ?? [];
+                        $md = $news->content ?? '';
+
+                        $html = \App\Support\Markdown::toSafeHtml($md);
+
+                        $html = preg_replace_callback(
+                            '/\{\{img:(\d)(?:\|cap:(.*?))?\}\}/s',
+                            function ($m) use ($galleryUrls) {
+                                $n = (int) $m[1];
+                                $url = $galleryUrls[$n - 1] ?? null;
+                                $cap = isset($m[2]) ? trim($m[2]) : '';
+
+                                if (!$url) {
+                                    return '<div>(Image ' . $n . ' not selected yet)</div>';
+                                }
+
+                                $capHtml = $cap ? '<figcaption>' . e($cap) . '</figcaption>' : '';
+                                return '<figure><img src="' .
+                                    e($url) .
+                                    '" alt="Gallery ' .
+                                    $n .
+                                    '" />' .
+                                    $capHtml .
+                                    '</figure>';
+                            },
+                            $html,
+                        );
+                    @endphp
 
                     <article class="prose prose-invert prose-amber max-w-none text-stone-200 leading-relaxed">
-                    {!! \App\Support\Markdown::toSafeHtml($news->content) !!}
+                        {!! $html !!}
                     </article>
+
 
                     {{-- Share section --}}
                     <div class="mt-10 flex items-center justify-between border-t border-amber-400/20 pt-6">
@@ -143,6 +172,30 @@
 
         .prose-amber strong {
             color: #fde68a;
+        }
+
+        .prose-amber figure {
+            margin: 1.5rem 0;
+        }
+
+        .prose-amber figure>img {
+            width: 100%;
+            border-radius: 1rem;
+            /* bo góc */
+            display: block;
+        }
+
+        .prose-amber figure>figcaption {
+            margin-top: .5rem;
+            text-align: center;
+            /* căn giữa */
+            font-style: italic;
+            /* in nghiêng */
+            font-size: 12px;
+            /* chữ nhỏ */
+            line-height: 1.25rem;
+            color: rgba(231, 229, 228, .7);
+            /* stone-ish */
         }
 
         .line-clamp-2 {

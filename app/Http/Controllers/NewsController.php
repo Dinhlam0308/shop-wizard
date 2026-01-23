@@ -25,9 +25,10 @@ class NewsController extends Controller
     {
         try {
             $search = $request->input('search');
-            $news = DB::table('news')->when($search, function ($query, $search) {
-                return $query->where('id', $search);
-            })->paginate(10);
+            $news = DB::table('news')
+                ->when($search, fn($q, $search) => $q->where('id', $search))
+                ->orderByDesc('created_at')
+                ->paginate(10);
             return view("admin.news.index", compact("news"));
         } catch (\Exception $e) {
             return redirect()->back()
@@ -55,34 +56,68 @@ class NewsController extends Controller
                 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
             ]);
             $validated = $validator->validate();
-            DB::transaction(function () use ($validated, $request) {
+            $validator_images = Validator::make($request->all(), [
+                'gallery_images' => 'nullable|array|max:4',
+                'gallery_images.*' => 'image|mimes:jpeg,png,jpg,gif|max:5120',
+            ]);
+            $validated_images = $validator_images->validate();
+            DB::transaction(function () use ($validated, $validated_images, $request) {
                 if ($request->hasFile('image')) {
                     $imageResult = Cloudinary::uploadApi()->upload($request->file('image')->getRealPath(), [
                         'folder' => 'news'
                     ]);
+
+                    if (!$imageResult || !isset($imageResult['secure_url']) || !isset($imageResult['public_id'])) {
+                        throw new \Exception('Failed to upload main news image: ' . json_encode($imageResult));
+                    }
                     $validated['image'] = $imageResult['secure_url'];
                     $validated['public_id'] = $imageResult['public_id'];
                 }
-                News::create($validated);
+                $news = News::create($validated);
+
+                if (!empty($validated_images['gallery_images']) && is_array($validated_images['gallery_images'])) {
+                    foreach ($validated_images['gallery_images'] as $galleryImage) {
+                        $galleryResult = Cloudinary::uploadApi()->upload(
+                            $galleryImage->getRealPath(),
+                            ['folder' => 'news/gallery']
+                        );
+
+                        if (!$galleryResult || !isset($galleryResult['secure_url']) || !isset($galleryResult['public_id'])) {
+                            throw new \Exception('Failed to upload news gallery image: ' . json_encode($galleryResult));
+                        }
+
+                        $news->images()->create([
+                            'image_url' => $galleryResult['secure_url'],
+                            'public_id' => $galleryResult['public_id'],
+                        ]);
+                    }
+                }
             });
             return redirect()->route('admin.news.index')->with('success', 'News article created successfully.');
         } catch (\Exception $e) {
             return redirect()->back()
-                ->withErrors(['error' => 'Failed to load create news form: ' . $e->getMessage()]);
+                ->withErrors(['error' => 'Failed to create news article: ' . $e->getMessage()]);
         }
     }
 
     public function show(string $id)
     {
         try {
-            $news = News::findOrFail($id);
+            $news = News::with('images')->findOrFail($id);
+            
+            $galleryUrls = $news->images
+                ->sortBy('id')
+                ->take(4)
+                ->pluck('image_url')
+                ->values()
+                ->all();
 
             $related = News::where('id', '!=', $news->id)
                 ->latest()
                 ->take(2)
                 ->get();
 
-            return view('user.news.show', compact('news', 'related'));
+            return view('user.news.show', compact('news', 'related', 'galleryUrls'));
         } catch (\Exception $e) {
             return redirect()->back()
                 ->withErrors(['error' => 'Failed to load news article: ' . $e->getMessage()]);
@@ -92,10 +127,15 @@ class NewsController extends Controller
     public function edit(string $id)
     {
         try {
-            $news = DB::table('news')->where('id', $id)->firstOrFail();
-            if (!$news) {
-                return redirect()->route('admin.news.index')->withErrors(['error' => 'News article not found.']);
-            }
+            $news = News::with('images')->findOrFail($id);
+
+            $news->gallery_images = $news->images->map(function ($img) {
+                return [
+                    'url' => $img->image_url,
+                    'id'  => $img->id,
+                ];
+            })->values();
+
             return view('admin.news.edit', compact('news'));
         } catch (\Exception $e) {
             return redirect()->back()
@@ -103,13 +143,11 @@ class NewsController extends Controller
         }
     }
 
+
     public function update(Request $request, string $id)
     {
         try {
-            $match = News::findOrFail($id);
-            if (!$match) {
-                return redirect()->route('admin.news.index')->withErrors(['error' => 'News article not found.']);
-            }
+            $match = News::with('images')->findOrFail($id);
 
             $validator = Validator::make($request->all(), [
                 'title' => 'required|string|max:255',
@@ -119,7 +157,14 @@ class NewsController extends Controller
             ]);
             $validated = $validator->validate();
 
-            DB::transaction(function () use ($match, $validated, $request) {
+            $validator_images = Validator::make($request->all(), [
+                'gallery_images' => 'nullable|array|max:4',
+                'gallery_images.*' => 'image|mimes:jpeg,png,jpg,gif|max:5120',
+                'deleted_image_ids' => 'nullable|json',
+            ]);
+            $validated_images = $validator_images->validate();
+
+            DB::transaction(function () use ($match, $validated, $validated_images, $request) {
                 if ($request->hasFile('image')) {
                     if ($match->public_id) {
                         Cloudinary::uploadApi()->destroy($match->public_id);
@@ -127,9 +172,45 @@ class NewsController extends Controller
                     $imageResult = Cloudinary::uploadApi()->upload($request->file('image')->getRealPath(), [
                         'folder' => 'news'
                     ]);
+                    if (!$imageResult || !isset($imageResult['secure_url']) || !isset($imageResult['public_id'])) {
+                        throw new \Exception('Failed to upload main news image: ' . json_encode($imageResult));
+                    }
+
                     $validated['image'] = $imageResult['secure_url'];
                     $validated['public_id'] = $imageResult['public_id'];
                 }
+                if ($request->has('deleted_image_ids') && $request->deleted_image_ids !== '[]') {
+                    $deletedIds = json_decode($request->deleted_image_ids, true);
+                    if (is_array($deletedIds)) {
+                        foreach ($deletedIds as $imageId) {
+                            $img = $match->images()->find($imageId);
+                            if ($img) {
+                                if ($img->public_id) {
+                                    Cloudinary::uploadApi()->destroy($img->public_id);
+                                }
+                                $img->delete();
+                            }
+                        }
+                    }
+                }
+                if (!empty($validated_images['gallery_images']) && is_array($validated_images['gallery_images'])) {
+                    foreach ($request->file('gallery_images') as $galleryImage) {
+                        $galleryResult = Cloudinary::uploadApi()->upload(
+                            $galleryImage->getRealPath(),
+                            ['folder' => 'news/gallery']
+                        );
+
+                        if (!$galleryResult || !isset($galleryResult['secure_url']) || !isset($galleryResult['public_id'])) {
+                            throw new \Exception('Failed to upload news gallery image: ' . json_encode($galleryResult));
+                        }
+
+                        $match->images()->create([
+                            'image_url' => $galleryResult['secure_url'],
+                            'public_id' => $galleryResult['public_id'],
+                        ]);
+                    }
+                }
+
                 $match->update($validated);
             });
 
@@ -143,7 +224,7 @@ class NewsController extends Controller
     public function destroy(string $id)
     {
         try {
-            $match = News::findOrFail($id);
+            $match = News::with('images')->findOrFail($id);
             if (!$match) {
                 return redirect()->route('admin.news.index')->withErrors(['error' => 'News article not found.']);
             }
@@ -151,6 +232,9 @@ class NewsController extends Controller
             DB::transaction(function () use ($match) {
                 if ($match->public_id) {
                     Cloudinary::uploadApi()->destroy($match->public_id);
+                }
+                foreach ($match->images as $img) {
+                    if ($img->public_id) Cloudinary::uploadApi()->destroy($img->public_id);
                 }
                 $match->delete();
             });

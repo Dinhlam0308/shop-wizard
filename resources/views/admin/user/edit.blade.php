@@ -48,35 +48,11 @@
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Email Address
                     </label>
-                    <input type="email" name="email" value="{{ old('email', $user->email) }}"
+                    <input type="email" name="email" value="{{ old('email', $user->email) }}" readonly
                         class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 
                                bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100
                                focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all duration-300"
                         placeholder="Enter email address">
-                </div>
-
-                <!-- Password & Confirm Password -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            New Password
-                        </label>
-                        <input type="password" name="password"
-                            class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 
-                                   bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100
-                                   focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all duration-300"
-                            placeholder="Leave blank to keep current">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Confirm Password
-                        </label>
-                        <input type="password" name="password_confirmation"
-                            class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 
-                                   bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100
-                                   focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all duration-300"
-                            placeholder="Re-enter new password">
-                    </div>
                 </div>
 
                 <!-- Role -->
@@ -92,23 +68,6 @@
                         <option value="admin" {{ old('role', $user->role) == 'admin' ? 'selected' : '' }}>Admin
                         </option>
                         <option value="user" {{ old('role', $user->role) == 'user' ? 'selected' : '' }}>User</option>
-                    </select>
-                </div>
-
-                <!-- Status -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Account Status
-                    </label>
-                    <select name="status"
-                        class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 
-                               bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100
-                               focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all duration-300">
-                        <option value="active"
-                            {{ old('status', $user->status ?? 'active') == 'active' ? 'selected' : '' }}>Active</option>
-                        <option value="inactive"
-                            {{ old('status', $user->status ?? 'inactive') == 'inactive' ? 'selected' : '' }}>Inactive
-                        </option>
                     </select>
                 </div>
 

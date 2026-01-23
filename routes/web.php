@@ -278,6 +278,19 @@ Route::get('/user/shop/accessories', [ProductController::class, 'shopAccessories
 Route::get('/user/rental', [ProductController::class, 'rental'])->name('user.shop.rental');
 // Product detail
 Route::get('/user/product/{id}', [ProductController::class, 'show'])->name('user.product.show');
+// Booking tarot
+Route::get('/user/booking/tarot', [\App\Http\Controllers\BookingController::class, 'createTarot'])->name('user.booking.tarot');
+// Booking table && position_class
+Route::get('/user/booking', [\App\Http\Controllers\BookingController::class, 'booking'])->name('user.booking');
+// Booking store
+Route::post('/user/booking/store', [\App\Http\Controllers\BookingController::class, 'store'])->name('user.booking.store');
+// Contact form
+Route::get('/user/contact', [\App\Http\Controllers\ContactController::class, 'contact'])->name('user.contact.create');
+Route::post('/user/contact', [\App\Http\Controllers\ContactController::class, 'store'])->name('user.contact.store');
+// Booking workshop
+Route::get('/user/workshop_registrations/workshop/{id}', [WorkshopRegistrationController::class, 'create'])->name('user.workshop_registrations.create');
+// Store workshop registration
+Route::post('/user/workshop_registrations/store', [WorkshopRegistrationController::class, 'store'])->name('user.workshop_registrations.store');
 
 
 Route::middleware(['auth'])->group(function () {
@@ -288,17 +301,6 @@ Route::middleware(['auth'])->group(function () {
     // Cancel order
     Route::delete('/orders/{id}/cancel', [OrderController::class, 'cancel'])->name('user.orders.cancel');
 
-
-    // Booking workshop
-    Route::get('/user/workshop_registrations/workshop/{id}', [WorkshopRegistrationController::class, 'create'])->name('user.workshop_registrations.create');
-    // Store workshop registration
-    Route::post('/user/workshop_registrations/store', [WorkshopRegistrationController::class, 'store'])->name('user.workshop_registrations.store');
-    // Booking tarot
-    Route::get('/user/booking/tarot', [\App\Http\Controllers\BookingController::class, 'createTarot'])->name('user.booking.tarot');
-    // Booking table && position_class
-    Route::get('/user/booking', [\App\Http\Controllers\BookingController::class, 'booking'])->name('user.booking');
-    // Booking store
-    Route::post('/user/booking/store', [\App\Http\Controllers\BookingController::class, 'store'])->name('user.booking.store');
     // Add to cart
     Route::post('/cart/add/{product_id}', [CartController::class, 'addToCart'])->name('cart.add');
     // Cart detail
@@ -309,10 +311,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/cart/checkout/store', [OrderController::class, 'store'])->name('user.order.store');
     // Feedback store
     Route::post('/user/feedback/store', [FeedbackController::class, 'store'])->name('user.feedback.store');
-
-    // Contact form
-    Route::get('/user/contact', [\App\Http\Controllers\ContactController::class, 'contact'])->name('user.contact.create');
-    Route::post('/user/contact', [\App\Http\Controllers\ContactController::class, 'store'])->name('user.contact.store');
 });
 
 Route::middleware(['auth'])
@@ -360,8 +358,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
     //booking management
     Route::get('/booking', [\App\Http\Controllers\BookingController::class, 'index'])->name('admin.booking.index');
-    Route::get('/booking/{id}', [\App\Http\Controllers\BookingController::class, 'show'])->name('admin.booking.show');
     Route::get('/booking/create', [\App\Http\Controllers\BookingController::class, 'create'])->name('admin.booking.create');
+    Route::get('/booking/{id}', [\App\Http\Controllers\BookingController::class, 'show'])->name('admin.booking.show');
     Route::post('/booking/store', [\App\Http\Controllers\BookingController::class, 'store'])->name('admin.booking.store');
     Route::get('/booking/{id}/edit/', [\App\Http\Controllers\BookingController::class, 'edit'])->name('admin.booking.edit');
     Route::put('/booking/{id}/update/', [\App\Http\Controllers\BookingController::class, 'update'])->name('admin.booking.update');

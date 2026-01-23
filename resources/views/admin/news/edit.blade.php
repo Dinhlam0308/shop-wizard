@@ -106,6 +106,10 @@
 
                         {{-- Mini toolbar --}}
                         <div class="flex flex-wrap items-center gap-2">
+                            <button type="button" @click="insertImageCaptionMarker()"
+                                class="px-2 py-1 rounded-lg text-xs bg-gray-100 dark:bg-gray-700">
+                                Image & Caption
+                            </button>
                             <button type="button" @click="wrap('**','**')"
                                 class="px-2 py-1 rounded-lg text-xs bg-gray-100 dark:bg-gray-700">Bold</button>
                             <button type="button" @click="wrap('*','*')"
@@ -220,6 +224,74 @@ Write **bold**, *italic*…
                         </div>
                     </div>
 
+                    {{-- Gallery Images (News) --}}
+                    <div x-data="productGalleryUpload({
+                        maxMB: 5,
+                        maxImages: 4,
+                        initial: @js($news->gallery_images ?? []) // <-- m phải chuẩn hoá data ở controller
+                    })">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                            Gallery Images (Maximum 4 images)
+                        </label>
+
+                        <template x-if="error">
+                            <p class="text-sm text-red-600 mb-3" x-text="error"></p>
+                        </template>
+
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                            <template x-for="(item, index) in gallery" :key="index">
+                                <div class="aspect-square">
+                                    <template x-if="item === null">
+                                        <div @drop.prevent="onDropToSlot($event, index)"
+                                            @dragover.prevent="isDragging = true"
+                                            @dragleave.prevent="isDragging = false" @click="openPicker()"
+                                            :class="isDragging ? 'border-blue-400 bg-blue-50' : 'border-gray-300'"
+                                            class="w-full h-full border-2 border-dashed rounded-xl bg-gray-50 dark:bg-gray-700 cursor-pointer
+                                transition-all duration-200 hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-gray-600
+                                flex flex-col items-center justify-center group">
+                                            <div
+                                                class="w-8 h-8 bg-gray-200 dark:bg-gray-600 rounded-full flex items-center justify-center mb-2
+                                    group-hover:bg-blue-100 transition-colors">
+                                                <svg class="w-4 h-4 text-gray-400 group-hover:text-blue-500"
+                                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                                </svg>
+                                            </div>
+                                            <span class="text-xs text-gray-500 text-center px-1"
+                                                x-text="`Image ${index + 1}`"></span>
+                                        </div>
+                                    </template>
+
+                                    <template x-if="item !== null">
+                                        <div class="relative w-full h-full group">
+                                            <img :src="item.url" :alt="`Gallery Image ${index + 1}`"
+                                                class="w-full h-full object-cover rounded-xl shadow-md" />
+
+                                            <button type="button" @click.stop="removeImage(index)"
+                                                class="absolute -top-2 -right-2 w-6 h-6 bg-white/95 backdrop-blur-sm
+                                   hover:bg-red-500 text-gray-600 hover:text-white rounded-full
+                                   flex items-center justify-center shadow-md hover:shadow-lg
+                                   opacity-0 group-hover:opacity-100 transition-all duration-300 ease-out
+                                   hover:scale-125 border border-gray-200/50 hover:border-red-500"
+                                                title="Remove Image">
+                                                <svg class="w-3 h-3 transition-all duration-200" fill="none"
+                                                    stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+
+                        <input type="file" name="gallery_images[]" multiple x-ref="galleryInput" accept="image/*"
+                            class="hidden" @change="onPick($event)">
+
+                        <input type="hidden" name="deleted_image_ids" x-ref="deletedImagesInput">
+                    </div>
 
                     {{-- Actions --}}
                     <div class="flex justify-end space-x-4 pt-6">

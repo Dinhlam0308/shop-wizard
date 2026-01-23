@@ -1,6 +1,11 @@
 <x-app-layout>
     {{-- === Page Title (SEO + UX) === --}}
     @section('title', "{$workshop->title} — Always Café Workshops")
+    @php
+        $workshopAt = \Carbon\Carbon::parse($workshop->date . ' ' . ($workshop->time ?? '23:59:59'));
+        $isExpired = $workshopAt->isPast();
+    @endphp
+
 
     <section class="relative mt-20 md:mt-28">
 
@@ -10,10 +15,8 @@
                 <div class="flex items-center gap-5">
                     <div
                         class="w-20 h-20 rounded-2xl overflow-hidden ring-2 ring-amber-400/20 shadow-[0_0_25px_rgba(255,215,0,0.1)] flex-shrink-0">
-                        <x-fallback-image
-                            src="{{ $workshop->image ?? '/images/workshop-ink.jpg' }}"
-                            alt="{{ $workshop->title }}"
-                            class="w-full h-full object-cover" />
+                        <x-fallback-image src="{{ $workshop->image ?? '/images/workshop-ink.jpg' }}"
+                            alt="{{ $workshop->title }}" class="w-full h-full object-cover" />
                     </div>
 
                     <div>
@@ -35,11 +38,22 @@
                         {{ number_format($workshop->price, 0, ',', '.') }}đ
                     </p>
 
-                    <a href="{{ route('user.workshop_registrations.create', $workshop->id) }}"
-                        class="hp-btn-primary inline-flex items-center gap-3 rounded-2xl px-6 py-3 text-base font-semibold hp-hover hp-glow">
-                        <i data-lucide="calendar-plus" class="w-5 h-5"></i>
-                        <span data-vi="Đăng ký tham gia" data-en="Register to Join"></span>
-                    </a>
+                    @if ($isExpired)
+                        <button type="button" disabled
+                            class="inline-flex items-center gap-3 rounded-2xl px-6 py-3 text-base font-semibold
+               bg-white/10 text-stone-300 border border-white/10
+               cursor-not-allowed opacity-70 grayscale
+               shadow-[0_8px_25px_rgba(0,0,0,0.35)]">
+                            <i data-lucide="ban" class="w-5 h-5 text-rose-300"></i>
+                            <span data-vi="Đã quá hạn" data-en="Expired"></span>
+                        </button>
+                    @else
+                        <a href="{{ route('user.workshop_registrations.create', $workshop->id) }}"
+                            class="hp-btn-primary inline-flex items-center gap-3 rounded-2xl px-6 py-3 text-base font-semibold hp-hover hp-glow">
+                            <i data-lucide="calendar-plus" class="w-5 h-5"></i>
+                            <span data-vi="Đăng ký" data-en="Register"></span>
+                        </a>
+                    @endif
                 </div>
             </div>
 
@@ -68,7 +82,8 @@
                                 <i data-lucide="map-pin" class="w-5 h-5 text-amber-300"></i>
                             </div>
                             <div>
-                                <p class="text-sm text-stone-400/70"><span data-vi="Địa điểm" data-en="Location"></span></p>
+                                <p class="text-sm text-stone-400/70"><span data-vi="Địa điểm" data-en="Location"></span>
+                                </p>
                                 <p class="font-medium text-amber-100">{{ $workshop->location }}</p>
                             </div>
                         </div>
@@ -79,8 +94,10 @@
                                 <i data-lucide="users" class="w-5 h-5 text-amber-300"></i>
                             </div>
                             <div>
-                                <p class="text-sm text-stone-400/70"><span data-vi="Số lượng tham dự tối đa" data-en="Maximum participants"></span></p>
-                                <p class="font-medium text-amber-100">{{ $workshop->max_participants }} <span data-vi="người" data-en="people"></span></p>
+                                <p class="text-sm text-stone-400/70"><span data-vi="Số lượng tham dự tối đa"
+                                        data-en="Maximum participants"></span></p>
+                                <p class="font-medium text-amber-100">{{ $workshop->max_participants }} <span
+                                        data-vi="người" data-en="people"></span></p>
                             </div>
                         </div>
                     </div>
@@ -93,7 +110,8 @@
                                 <i data-lucide="clock-4" class="w-5 h-5 text-amber-300"></i>
                             </div>
                             <div>
-                                <p class="text-sm text-stone-400/70"><span data-vi="Thời gian bắt đầu" data-en="Start time"></span></p>
+                                <p class="text-sm text-stone-400/70"><span data-vi="Thời gian bắt đầu"
+                                        data-en="Start time"></span></p>
                                 <p class="font-medium text-amber-100">
                                     {{ \Illuminate\Support\Carbon::parse($workshop->time)->format('H:i') }}
                                 </p>
@@ -106,7 +124,8 @@
                                 <i data-lucide="calendar-days" class="w-5 h-5 text-amber-300"></i>
                             </div>
                             <div>
-                                <p class="text-sm text-stone-400/70"><span data-vi="Ngày tổ chức" data-en="Event Date"></span></p>
+                                <p class="text-sm text-stone-400/70"><span data-vi="Ngày tổ chức"
+                                        data-en="Event Date"></span></p>
                                 <p class="font-medium text-amber-100">
                                     {{ \Illuminate\Support\Carbon::parse($workshop->date)->translatedFormat('d F, Y') }}
                                 </p>

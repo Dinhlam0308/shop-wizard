@@ -16,12 +16,11 @@
                     <a href="{{ route('dashboard') }}"
                         class="group inline-flex items-center gap-2.5 rounded-full
 px-3 py-1.5
-bg-black dark:bg:hover-gray-200
 shadow-[0_2px_10px_rgba(0,0,0,0.1)]
 hover:shadow-[0_4px_14px_rgba(0,0,0,0.15)]
 transition-all duration-700 ease-in-out hover:scale-[1.08] active:scale-[0.96]">
 
-                        <img src="{{ asset('images/Logo.jpg') }}" class="h-7 w-auto" alt="Logo">
+                        <img src="{{ asset('images/Logo.png') }}" class="h-7 w-auto" alt="Logo">
                     </a>
                 </div>
 
@@ -106,6 +105,7 @@ transition-all duration-700 ease-in-out hover:scale-[1.08] active:scale-[0.96]">
       $nextTick(() => window.renderIcons && window.renderIcons());
     "
                             class="relative flex items-center justify-center w-11 h-11 rounded-full
+            hover:bg-white/70 dark:hover:bg-gray-800/40
            transition-all duration-700 ease-in-out hover:scale-[1.08] active:scale-[0.96]">
 
                             <i data-lucide="search" class="w-5 h-5 text-gray-100 dark:text-gray-200"></i>
@@ -123,7 +123,7 @@ transition-all duration-700 ease-in-out hover:scale-[1.08] active:scale-[0.96]">
                                 localStorage.setItem('darkMode', v);
                             });" @click="isDark = !isDark"
                                 class="relative flex items-center justify-center w-11 h-11 rounded-full
-                            bg-white/60 dark:bg-[#1b1b1d]/40
+            hover:bg-white/70 dark:hover:bg-gray-800/40
                             hover:shadow-[inset_0_1px_3px_rgba(255,255,255,0.4),0_4px_14px_rgba(0,0,0,0.15)]
                             transition-all duration-700 ease-in-out backdrop-blur-xl hover:scale-[1.08] active:scale-[0.96]">
                                 <i data-lucide="sun" class="w-5 h-5 text-yellow-400" x-cloak x-show="!isDark"></i>
@@ -137,17 +137,14 @@ transition-all duration-700 ease-in-out hover:scale-[1.08] active:scale-[0.96]">
                         <div x-data="{ open: false }" class="relative">
                             <button @click="open=!open; $nextTick(() => window.renderIcons && window.renderIcons())"
                                 class="group inline-flex items-center justify-center
-               h-10 w-10 rounded-full
-               bg-white/70 dark:bg-gray-800/40
-                            hover:shadow-[inset_0_1px_3px_rgba(255,255,255,0.4),0_4px_14px_rgba(0,0,0,0.15)]
-                            transition-all duration-700 ease-in-out backdrop-blur-xl hover:scale-[1.08] active:scale-[0.96]
-               backdrop-blur-xl
-               text-neutral-700 dark:text-neutral-300
-               hover:bg-white/80 dark:hover:bg-white/[0.10]
-               transition-all duration-500 ease-out">
+h-10 w-10 rounded-full
+hover:bg-white/70 dark:hover:bg-gray-800/40
+hover:shadow-[inset_0_1px_3px_rgba(255,255,255,0.4),0_4px_14px_rgba(0,0,0,0.15)]
+transition-all duration-700 ease-in-out hover:scale-[1.08] active:scale-[0.96]
+text-neutral-700 dark:text-neutral-300">
 
                                 <i data-lucide="user"
-                                    class="w-5 h-5
+                                    class="w-5 h-5 text-gray-200
                   opacity-80 group-hover:opacity-100
                   transition-opacity duration-500"></i>
                             </button>
@@ -188,9 +185,9 @@ transition-all duration-700 ease-in-out hover:scale-[1.08] active:scale-[0.96]">
                         @if ($user->role !== 'admin')
                             <a href="{{ route('cart.show') }}"
                                 class="relative flex items-center justify-center w-11 h-11 rounded-full
-                        bg-white/60 dark:bg-[#1b1b1d]/40
+                        hover:bg-white/70 dark:hover:bg-gray-800/40
                         hover:shadow-[inset_0_1px_3px_rgba(255,255,255,0.4),0_4px_14px_rgba(0,0,0,0.15)]
-                        backdrop-blur-xl transition-all duration-700 ease-in-out hover:scale-[1.08] active:scale-[0.96] group">
+                         transition-all duration-700 ease-in-out hover:scale-[1.08] active:scale-[0.96] group">
                                 <i data-lucide="shopping-bag" class="w-5 h-5 text-amber-400"></i>
                                 <span
                                     class="absolute -top-1.5 -right-1.5 flex items-center justify-center
@@ -204,10 +201,10 @@ transition-all duration-700 ease-in-out hover:scale-[1.08] active:scale-[0.96]">
 
                     <button type="button" id="langToggleBtn"
                         class="relative flex items-center justify-center h-11 px-4 rounded-full
-            bg-white/60 dark:bg-[#1b1b1d]/40
+            hover:bg-white/70 dark:hover:bg-gray-800/40
             hover:shadow-[inset_0_1px_3px_rgba(255,255,255,0.4),0_4px_14px_rgba(0,0,0,0.15)]
-            backdrop-blur-xl transition-all duration-700 ease-in-out hover:scale-[1.03] active:scale-[0.98]">
-                        <span id="langLabel" class="text-sm font-semibold text-gray-800 dark:text-gray-100">VI</span>
+             transition-all duration-700 ease-in-out hover:scale-[1.03] active:scale-[0.98]">
+                        <span id="langLabel" class="text-sm font-semibold text-gray-200 dark:text-gray-100">VI</span>
                     </button>
 
                     @guest

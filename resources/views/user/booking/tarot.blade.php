@@ -97,7 +97,7 @@
                hover:shadow-[0_0_80px_rgba(212,175,55,0.2)]">
                     @csrf
                     <input type="hidden" name="type" value="tarot">
-                    <input type="hidden" name="user_id" value="{{ auth()->id() }}">
+                    <input type="hidden" name="user_id" value="{{ auth()?->id() }}">
 
                     {{-- 🕯️ Header --}}
                     <header class="text-center mb-10">
@@ -118,6 +118,71 @@
 
                     {{-- 🪄 Form Fields --}}
                     <div class="space-y-6 animate-[fade-in_1.4s_ease-out]">
+                        {{-- Name & Phone --}}
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {{-- Full Name --}}
+                            <div class="space-y-2">
+                                <label for="name" class="text-sm font-medium text-gray-200">
+                                    <span data-vi="Họ và tên" data-en="Full Name"></span>
+                                </label>
+
+                                <div class="relative">
+                                    <i data-lucide="user"
+                                        class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-amber-300/80"></i>
+
+                                    <input type="text" id="name" name="name"
+                                        value="{{ old('name', auth()->user()?->name) }}"
+                                        class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-700/60 bg-gray-900/60
+                       text-gray-100 placeholder-amber-300/70
+                       focus:ring-2 focus:ring-amber-400/70 focus:border-amber-400
+                       transition-all duration-300 shadow-inner"
+                                        data-placeholder-vi="Nhập họ và tên" data-placeholder-en="Enter full name">
+                                </div>
+                            </div>
+
+                            {{-- Email (chỉ khi chưa đăng nhập) --}}
+                            @guest
+                                <div class="space-y-2">
+                                    <label for="email" class="text-sm font-medium text-gray-200">
+                                        <span data-vi="Email" data-en="Email"></span>
+                                    </label>
+
+                                    <div class="relative">
+                                        <i data-lucide="mail"
+                                            class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-purple-300/80"></i>
+
+                                        <input type="email" id="email" name="email" value="{{ old('email') }}"
+                                            required
+                                            class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-700/60 bg-gray-900/60
+                       text-gray-100 placeholder-amber-300/70
+                       focus:ring-2 focus:ring-purple-400/70 focus:border-purple-400
+                       transition-all duration-300 shadow-inner"
+                                            data-placeholder-vi="Nhập email của bạn"
+                                            data-placeholder-en="Enter your email" />
+                                    </div>
+                                </div>
+                            @endguest
+
+                            {{-- Phone Number --}}
+                            <div class="space-y-2">
+                                <label for="phone" class="text-sm font-medium text-gray-200">
+                                    <span data-vi="Số điện thoại" data-en="Phone Number"></span>
+                                </label>
+
+                                <div class="relative">
+                                    <i data-lucide="phone"
+                                        class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-rose-300/80"></i>
+
+                                    <input type="text" id="phone" name="phone" value="{{ old('phone') }}"
+                                        class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-700/60 bg-gray-900/60
+                       text-gray-100 placeholder-amber-300/70
+                       focus:ring-2 focus:ring-rose-400/70 focus:border-rose-400
+                       transition-all duration-300 shadow-inner"
+                                        data-placeholder-vi="Nhập số điện thoại"
+                                        data-placeholder-en="Enter phone number">
+                                </div>
+                            </div>
+                        </div>
                         {{-- Date with Flatpickr --}}
                         <div class="space-y-2">
                             <label for="booking_date" class="text-sm font-medium text-gray-200">

@@ -56,7 +56,7 @@
                flex items-center justify-center"
                             aria-hidden="true">
                             <span class="text-sm font-semibold text-gray-700 dark:text-gray-200">
-                                {{ strtoupper(mb_substr($match->user->name ?? 'U', 0, 1)) }}
+                                {{ strtoupper(mb_substr($booking->user->name ?? 'U', 0, 1)) }}
                             </span>
                         </div>
 
@@ -100,6 +100,16 @@
                     <p class="font-semibold text-gray-900 dark:text-gray-100">Booking Type</p>
                     <p class="mt-1 capitalize">{{ $booking->type ?? '—' }}</p>
                 </div>
+                <div>
+                    <p class="font-semibold text-gray-900 dark:text-gray-100">Full Name</p>
+                    <p class="mt-1">{{ $booking->name ?? '—' }}</p>
+                </div>
+
+                <div>
+                    <p class="font-semibold text-gray-900 dark:text-gray-100">Phone Number</p>
+                    <p class="mt-1">{{ $booking->phone ?? '—' }}</p>
+                </div>
+
                 <div>
                     <p class="font-semibold text-gray-900 dark:text-gray-100">Booking Date</p>
                     <p class="mt-1">{{ \Carbon\Carbon::parse($booking->booking_date)->format('d/m/Y') }}</p>
